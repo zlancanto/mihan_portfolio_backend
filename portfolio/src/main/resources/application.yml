@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: portfolio
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+app:
+  contact:
+    email: ${MAIL_EMAIL}
+  cors:
+    allowed-origins:
+      - https://mihanportfolio.vercel.app
+      - http://localhost:5173
+    allowed-methods:
+        - POST
+    allowed-headers:
+        - "*"
+    allow-credentials: true
+
+server:
+  port: ${PORT:8080}
