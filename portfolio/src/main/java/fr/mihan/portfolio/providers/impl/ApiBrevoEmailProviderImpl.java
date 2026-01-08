@@ -2,6 +2,7 @@ package fr.mihan.portfolio.providers.impl;
 
 import fr.mihan.portfolio.dto.ContactDTO;
 import fr.mihan.portfolio.dto.EmailRequestDTO;
+import fr.mihan.portfolio.properties.AdminPropertie;
 import fr.mihan.portfolio.properties.ApiBrevoPropertie;
 import fr.mihan.portfolio.properties.ContactPropertie;
 import fr.mihan.portfolio.providers.ContactMailProvider;
@@ -21,6 +22,7 @@ import java.util.List;
 public final class ApiBrevoEmailProviderImpl implements ContactMailProvider {
     private final ApiBrevoPropertie brevoPropertie;
     private final ContactPropertie contactPropertie;
+    private final AdminPropertie adminPropertie;
 
     @Override
     public void sendEmail(ContactDTO dto) throws MessagingException {
@@ -30,6 +32,29 @@ public final class ApiBrevoEmailProviderImpl implements ContactMailProvider {
         String cleanEmail = HtmlUtils.htmlEscape(dto.getEmail());
         String cleanMessage = HtmlUtils.htmlEscape(dto.getMessage()).replace("\n", "<br/>");
 
+        EmailRequestDTO bodyAdmin = buildEmailAdmin(cleanName, cleanEmail, cleanMessage);
+        EmailRequestDTO bodyUser = buildEmailUser(cleanEmail);
+
+        // Admin
+        HttpResponse<JsonNode> response = Unirest.post(url)
+                .body(bodyAdmin)
+               .asJson();
+
+        if (!response.isSuccess()) {
+            throw new RuntimeException("Échec de l'envoi Admin : " + response.getBody());
+        }
+
+        // User
+        response = Unirest.post(url)
+                .body(bodyUser)
+                .asJson();
+
+        if (!response.isSuccess()) {
+            throw new RuntimeException("Échec de l'envoi User : " + response.getBody());
+        }
+    }
+
+    private EmailRequestDTO buildEmailAdmin(String name, String email, String msg) {
         String htmlContent = """
             <html>
                 <body style="font-family: sans-serif;">
@@ -42,21 +67,35 @@ public final class ApiBrevoEmailProviderImpl implements ContactMailProvider {
                     </div>
                 </body>
             </html>
-        """.formatted(cleanEmail, cleanName, cleanMessage);
+        """.formatted(email, name, msg);
 
-        EmailRequestDTO body = EmailRequestDTO.builder()
+        return EmailRequestDTO.builder()
                 .sender(new EmailRequestDTO.Sender("Portfolio Contact", contactPropertie.getEmail()))
                 .to(List.of(new EmailRequestDTO.To(contactPropertie.getEmail())))
-                .subject("Nouveau message de : " + dto.getName())
+                .subject("Nouveau message de : " + name)
                 .htmlContent(htmlContent)
                 .build();
+    }
 
-        HttpResponse<JsonNode> response = Unirest.post(url)
-                .body(body)
-               .asJson();
+    private EmailRequestDTO buildEmailUser(String email) {
+        final String ADMIN_NAME = adminPropertie.firstName() + " " + adminPropertie.lastName();
+        String htmlContent = """
+            <html>
+                <body style="font-family: sans-serif;">
+                    <h2>Merci de m'avoir contacté !</h2>
+                    <p>J'ai bien reçu votre message et je vous répondrai dans les plus brefs délais.</p>
+                    <br/>
+                    <p>Cordialement,<p>
+                    <p><strong>%s</strong></p>
+                </body>
+            </html>
+        """.formatted(ADMIN_NAME);
 
-        if (!response.isSuccess()) {
-            throw new RuntimeException("Échec de l'envoi : " + response.getBody());
-        }
+        return EmailRequestDTO.builder()
+                .sender(new EmailRequestDTO.Sender("<ScriptKode/>", contactPropertie.getEmail()))
+                .to(List.of(new EmailRequestDTO.To(email)))
+                .subject("Accusé de reception")
+                .htmlContent(htmlContent)
+                .build();
     }
 }

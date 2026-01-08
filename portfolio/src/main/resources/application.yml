@@ -38,3 +38,7 @@ api:
   brevo:
     base-url: https://api.brevo.com/v3
     api-key: ${BREVO_API_KEY}
+
+admin:
+  first-name: Elisée
+  last-name: MIHAN
