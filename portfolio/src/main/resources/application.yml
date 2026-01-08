@@ -26,10 +26,15 @@ app:
       - https://mihanportfolio.vercel.app
       - http://localhost:5173
     allowed-methods:
-        - POST
+      - POST
     allowed-headers:
-        - "*"
+      - "*"
     allow-credentials: true
 
 server:
   port: ${PORT:8080}
+
+api:
+  brevo:
+    base-url: https://api.brevo.com/v3
+    api-key: ${BREVO_API_KEY}

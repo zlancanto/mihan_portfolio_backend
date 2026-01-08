@@ -1,7 +1,7 @@
-package fr.mihan.portfolio.exception;
+package fr.mihan.portfolio.exceptions;
 
 import fr.mihan.portfolio.dto.ErrorResponseDTO;
-import fr.mihan.portfolio.service.ContactMailService;
+import fr.mihan.portfolio.providers.ContactMailProvider;
 import jakarta.mail.MessagingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice(basePackageClasses = ContactMailService.class)
+@RestControllerAdvice(basePackageClasses = ContactMailProvider.class)
 public class ContactExceptionHandler {
 
     private static final

@@ -1,8 +1,8 @@
-package fr.mihan.portfolio.service.impl;
+package fr.mihan.portfolio.providers.impl;
 
 import fr.mihan.portfolio.dto.ContactDTO;
-import fr.mihan.portfolio.propertie.ContactProperties;
-import fr.mihan.portfolio.service.ContactMailService;
+import fr.mihan.portfolio.properties.ContactPropertie;
+import fr.mihan.portfolio.providers.ContactMailProvider;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -16,23 +16,23 @@ import java.util.Objects;
  * Service d'envoi de mail
  */
 @Service
-public class ContactContactMailServiceImpl implements ContactMailService {
+public class ContactContactMailProviderImpl implements ContactMailProvider {
     private final JavaMailSender mailSender;
-    private final ContactProperties contactProperties;
+    private final ContactPropertie contactPropertie;
 
     /**
      * Création d'un service mail
      * @param mailSender objet qui envoie le mail
-     * @param contactProperties propriétés du contact
+     * @param contactPropertie propriétés du contact
      * @NullPointerException si au moins un params est null
      */
-    public ContactContactMailServiceImpl(JavaMailSender mailSender, ContactProperties contactProperties) {
+    public ContactContactMailProviderImpl(JavaMailSender mailSender, ContactPropertie contactPropertie) {
         this.mailSender= Objects.requireNonNull(
                 mailSender,
                 "mailSender can't be null"
         );
-        this.contactProperties = Objects.requireNonNull(
-                contactProperties,
+        this.contactPropertie = Objects.requireNonNull(
+                contactPropertie,
                 "contactProperties can't be null"
         );
     }
@@ -44,7 +44,7 @@ public class ContactContactMailServiceImpl implements ContactMailService {
      * @throws MessagingException s'il y a une exception
      */
     @Override
-    public void sendMail(ContactDTO dto) throws MessagingException {
+    public void sendEmail(ContactDTO dto) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
@@ -66,7 +66,7 @@ public class ContactContactMailServiceImpl implements ContactMailService {
             </html>
         """.formatted(cleanEmail, cleanName, cleanMessage);
 
-        helper.setTo(contactProperties.getEmail());
+        helper.setTo(contactPropertie.getEmail());
         helper.setReplyTo(dto.getEmail());
         helper.setSubject(dto.getSubject());
         helper.setText(htmlContent, true);

@@ -1,4 +1,4 @@
-package fr.mihan.portfolio.exception;
+package fr.mihan.portfolio.exceptions;
 
 import fr.mihan.portfolio.dto.ErrorResponseDTO;
 import org.slf4j.Logger;

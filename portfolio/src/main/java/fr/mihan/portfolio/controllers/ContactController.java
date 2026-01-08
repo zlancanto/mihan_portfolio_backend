@@ -1,39 +1,31 @@
-package fr.mihan.portfolio.controller;
+package fr.mihan.portfolio.controllers;
 
 import fr.mihan.portfolio.dto.ContactDTO;
 import fr.mihan.portfolio.dto.SuccessResponseDTO;
-import fr.mihan.portfolio.service.ContactMailService;
-import fr.mihan.portfolio.service.RateLimitService;
+import fr.mihan.portfolio.services.impl.ApiBrevoEmailServiceImpl;
+import fr.mihan.portfolio.services.impl.RateLimitServiceImpl;
 import io.github.bucket4j.Bucket;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Objects;
-
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/contact")
 public class ContactController {
-    private final ContactMailService contactMailService;
-    private final RateLimitService rateLimitService;
-
-    public ContactController(
-            ContactMailService contactMailService,
-            RateLimitService rateLimitService
-    ) {
-        this.contactMailService = contactMailService;
-        this.rateLimitService = rateLimitService;
-    }
+    private final ApiBrevoEmailServiceImpl apiBrevoEmailService;
+    private final RateLimitServiceImpl rateLimitService;
 
     /**
      * Envoi de message
-     * @param dto
-     * @param request
+     * @param dto les infos du user qui envoie le msg
+     * @param request la requette http
      * @return response
-     * @throws MessagingException
+     * @throws MessagingException en cas d'exception
      */
     @PostMapping
     public ResponseEntity<SuccessResponseDTO> sendMessage(
@@ -45,7 +37,7 @@ public class ContactController {
         Bucket bucket = rateLimitService.resolveBucket(ip);
 
         if (bucket.tryConsume(1)) {
-            contactMailService.sendMail(dto);
+            apiBrevoEmailService.sendEmail(dto);
             return ResponseEntity.ok(new SuccessResponseDTO("Message envoyé avec succès."));
         }
         else {

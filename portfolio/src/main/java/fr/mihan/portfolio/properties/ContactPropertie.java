@@ -1,4 +1,4 @@
-package fr.mihan.portfolio.propertie;
+package fr.mihan.portfolio.properties;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -12,6 +12,6 @@ import org.springframework.stereotype.Component;
 @Setter
 @Component
 @ConfigurationProperties(prefix = "app.contact")
-public final class ContactProperties {
+public final class ContactPropertie {
     private String email;
 }

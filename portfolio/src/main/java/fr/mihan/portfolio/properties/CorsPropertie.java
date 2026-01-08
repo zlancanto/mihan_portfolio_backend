@@ -1,4 +1,4 @@
-package fr.mihan.portfolio.propertie;
+package fr.mihan.portfolio.properties;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @ConfigurationProperties(prefix = "app.cors")
-public class CorsProperties {
+public class CorsPropertie {
     private final List<String> allowedOrigins;
     private final List<String> allowedMethods;
     private final List<String> allowedHeaders;

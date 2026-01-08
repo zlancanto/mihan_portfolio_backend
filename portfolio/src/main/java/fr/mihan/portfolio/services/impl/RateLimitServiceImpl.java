@@ -1,4 +1,4 @@
-package fr.mihan.portfolio.service;
+package fr.mihan.portfolio.services.impl;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -9,11 +9,12 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class RateLimitService {
+public class RateLimitServiceImpl {
+    private static final int MAX_IP_IN_MEMORY = 1000;
 
     private final Cache<String, Bucket> buckets = Caffeine.newBuilder()
             .expireAfterAccess(2, TimeUnit.HOURS) // Supprime l'IP si aucune requête après 2h
-            .maximumSize(1000) // max 1000 IPs en mémoire
+            .maximumSize(MAX_IP_IN_MEMORY) // max 1000 IPs en mémoire
             .build();
 
     public Bucket resolveBucket(String ip) {
@@ -22,13 +23,13 @@ public class RateLimitService {
 
     private Bucket newBucket() {
         /*.
-         * 3 messages max par heure
-         * On récupère 1 jeton toutes les 20 minutes
+         * 3 messages max par jour
+         * On récupère 1 jeton toutes les 8h
          */
         return Bucket.builder()
                 .addLimit(limit -> limit
                         .capacity(3)
-                        .refillIntervally(3, Duration.ofHours(1)))
+                        .refillIntervally(3, Duration.ofDays(1)))
                 .build();
     }
 }
