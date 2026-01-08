@@ -2,12 +2,12 @@ package fr.mihan.portfolio.providers.impl;
 
 import fr.mihan.portfolio.dto.ContactDTO;
 import fr.mihan.portfolio.dto.EmailRequestDTO;
+import fr.mihan.portfolio.exceptions.ContactMailException;
 import fr.mihan.portfolio.properties.AdminPropertie;
 import fr.mihan.portfolio.properties.ApiBrevoPropertie;
 import fr.mihan.portfolio.properties.ContactPropertie;
-import fr.mihan.portfolio.providers.ContactMailProvider;
+import fr.mihan.portfolio.providers.ContactMail;
 import fr.mihan.portfolio.variables.RoutesApiBrevo;
-import jakarta.mail.MessagingException;
 import kong.unirest.HttpResponse;
 import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
@@ -19,19 +19,21 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public final class ApiBrevoEmailProviderImpl implements ContactMailProvider {
+public final class ApiBrevoEmailProviderImpl implements ContactMail {
     private final ApiBrevoPropertie brevoPropertie;
     private final ContactPropertie contactPropertie;
     private final AdminPropertie adminPropertie;
 
     @Override
-    public void sendEmail(ContactDTO dto) throws MessagingException {
+    public void sendEmail(ContactDTO dto) throws ContactMailException {
         final String url = brevoPropertie.baseUrl() + RoutesApiBrevo.SEND_EMAIL;
 
+        // Echappement des caractères HTML
         String cleanName = HtmlUtils.htmlEscape(dto.getName());
         String cleanEmail = HtmlUtils.htmlEscape(dto.getEmail());
         String cleanMessage = HtmlUtils.htmlEscape(dto.getMessage()).replace("\n", "<br/>");
 
+        // Contenu email
         EmailRequestDTO bodyAdmin = buildEmailAdmin(cleanName, cleanEmail, cleanMessage);
         EmailRequestDTO bodyUser = buildEmailUser(cleanEmail);
 
@@ -41,7 +43,7 @@ public final class ApiBrevoEmailProviderImpl implements ContactMailProvider {
                .asJson();
 
         if (!response.isSuccess()) {
-            throw new RuntimeException("Échec de l'envoi Admin : " + response.getBody());
+            throw new ContactMailException("Échec de l'envoi Admin : " + response.getBody());
         }
 
         // User
@@ -50,10 +52,17 @@ public final class ApiBrevoEmailProviderImpl implements ContactMailProvider {
                 .asJson();
 
         if (!response.isSuccess()) {
-            throw new RuntimeException("Échec de l'envoi User : " + response.getBody());
+            throw new ContactMailException("Échec de l'envoi User : " + response.getBody());
         }
     }
 
+    /**
+     * Contruction de l'email à envoyer à l'admin ScriptKode
+     * @param name nom du user
+     * @param email du user
+     * @param msg message du user
+     * @return {@code email} construit
+     */
     private EmailRequestDTO buildEmailAdmin(String name, String email, String msg) {
         String htmlContent = """
             <html>
@@ -77,6 +86,11 @@ public final class ApiBrevoEmailProviderImpl implements ContactMailProvider {
                 .build();
     }
 
+    /**
+     * Contruction de l'email à envoyer au user
+     * @param email de l'utilisateur
+     * @return {@code email} construit
+     */
     private EmailRequestDTO buildEmailUser(String email) {
         final String ADMIN_NAME = adminPropertie.firstName() + " " + adminPropertie.lastName();
         String htmlContent = """

@@ -2,6 +2,7 @@ package fr.mihan.portfolio.controllers;
 
 import fr.mihan.portfolio.dto.ContactDTO;
 import fr.mihan.portfolio.dto.SuccessResponseDTO;
+import fr.mihan.portfolio.exceptions.ContactMailException;
 import fr.mihan.portfolio.services.impl.ApiBrevoEmailServiceImpl;
 import fr.mihan.portfolio.services.impl.RateLimitServiceImpl;
 import io.github.bucket4j.Bucket;
@@ -31,7 +32,7 @@ public class ContactController {
     public ResponseEntity<SuccessResponseDTO> sendMessage(
             @Valid @RequestBody ContactDTO dto,
             HttpServletRequest request
-    ) throws MessagingException {
+    ) throws MessagingException, ContactMailException {
 
         final String ip = request.getRemoteAddr();
         Bucket bucket = rateLimitService.resolveBucket(ip);

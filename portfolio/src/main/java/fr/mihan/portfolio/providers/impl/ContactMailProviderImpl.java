@@ -2,7 +2,7 @@ package fr.mihan.portfolio.providers.impl;
 
 import fr.mihan.portfolio.dto.ContactDTO;
 import fr.mihan.portfolio.properties.ContactPropertie;
-import fr.mihan.portfolio.providers.ContactMailProvider;
+import fr.mihan.portfolio.providers.ContactMail;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -16,7 +16,7 @@ import java.util.Objects;
  * Service d'envoi de mail
  */
 @Service
-public class ContactContactMailProviderImpl implements ContactMailProvider {
+public class ContactMailProviderImpl implements ContactMail {
     private final JavaMailSender mailSender;
     private final ContactPropertie contactPropertie;
 
@@ -26,7 +26,7 @@ public class ContactContactMailProviderImpl implements ContactMailProvider {
      * @param contactPropertie propriétés du contact
      * @NullPointerException si au moins un params est null
      */
-    public ContactContactMailProviderImpl(JavaMailSender mailSender, ContactPropertie contactPropertie) {
+    public ContactMailProviderImpl(JavaMailSender mailSender, ContactPropertie contactPropertie) {
         this.mailSender= Objects.requireNonNull(
                 mailSender,
                 "mailSender can't be null"

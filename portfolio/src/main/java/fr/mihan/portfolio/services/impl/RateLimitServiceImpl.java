@@ -14,7 +14,7 @@ public class RateLimitServiceImpl {
 
     private final Cache<String, Bucket> buckets = Caffeine.newBuilder()
             .expireAfterAccess(2, TimeUnit.HOURS) // Supprime l'IP si aucune requête après 2h
-            .maximumSize(MAX_IP_IN_MEMORY) // max 1000 IPs en mémoire
+            .maximumSize(MAX_IP_IN_MEMORY) // max d'IPs en mémoire
             .build();
 
     public Bucket resolveBucket(String ip) {
@@ -29,7 +29,7 @@ public class RateLimitServiceImpl {
         return Bucket.builder()
                 .addLimit(limit -> limit
                         .capacity(3)
-                        .refillIntervally(3, Duration.ofDays(1)))
+                        .refillIntervally(1, Duration.ofHours(8)))
                 .build();
     }
 }
